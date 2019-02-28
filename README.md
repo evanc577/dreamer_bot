@@ -1,7 +1,8 @@
 # dreamer_bot
 Discord bot
 
-## Dependencies
+## Python Dependencies
+- python3.6
 - discord.py
 - yaml
 
