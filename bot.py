@@ -63,9 +63,9 @@ async def do_react(message, argv):
         return
 
     # respond with reply
-    if argv[1] in replies:
-        msg = replies[argv[1]]['message']
-        f = replies[argv[1]]['file']
+    if argv[1].lower() in replies:
+        msg = replies[argv[1].lower()]['message']
+        f = replies[argv[1].lower()]['file']
         await client.send_file(message.channel, f, content=msg)
         return
     else:
@@ -133,7 +133,7 @@ async def do_add_react(message, argv):
     urllib.request.urlretrieve(argv[3], f_path)
 
     # update replies.yaml
-    new_data = { argv[1]: { 'message': argv[2], 'file': f_path } }
+    new_data = { argv[1].lower(): { 'message': argv[2], 'file': f_path } }
     try:
         with open('replies.yaml', 'r') as f:
             cur_yaml = yaml.load(f)
@@ -152,6 +152,41 @@ async def do_add_react(message, argv):
     msg = 'Successfully added reaction `{}`'.format(argv[1])
     await client.send_message(message.channel, msg)
 
+async def do_remove_react(message, argv):
+    if len(argv) != 3:
+        msg = 'Error: needs 1 arguments. See `{}help`'.format(PREFIX)
+        await client.send_message(message.channel, msg)
+        return
+
+    # check if reaction command already exists
+    try:
+        with open('replies.yaml', 'r') as f:
+            replies = yaml.load(f)
+    except:
+        print('Error opening replies file')
+        return
+    if argv[1].lower() not in replies:
+        msg = 'Error: reaction command `{}` does not exist'.format(argv[1])
+        await client.send_message(message.channel, msg)
+        return
+
+    #load file and remove react from it, then resave it
+    try:
+        with open('replies.yaml', 'r') as f:
+            cur_yaml = yaml.load(f)
+            # remove from local machine
+            os.remove(replies[argv[1].lower()]['file'])
+            #del from list
+            del cur_yaml[argv[1].lower()]
+    except:
+        print('Error opening replies file')
+        return
+    try:
+        with open('replies.yaml', 'w') as f:
+            yaml.safe_dump(cur_yaml, f, default_flow_style=False)
+    except:
+        print('Error saving replies file')
+        return
 
 
 # list current reactions
