@@ -1,6 +1,9 @@
 import discord
 import shlex
 import yaml
+import urllib.request
+import re
+import os
 import sys
 
 # get token
@@ -42,6 +45,10 @@ async def run_command(message):
         await do_help(message, argv)
     elif argv[0].lower() == 'help':
         await do_help(message, argv)
+    elif argv[0].lower() == 'a':
+        await do_add_react(message, argv)
+    elif argv[0].lower() == 'add':
+        await do_add_react(message, argv)
     else:
         await do_unknown(message, argv)
 
@@ -49,7 +56,7 @@ async def run_command(message):
 # reply with a messange and file
 async def do_react(message, argv):
     if len(argv) != 2:
-        msg = 'Error: needs 1 argument. See `$help`'
+        msg = 'Error: needs 1 argument. See `{}help`'.format(PREFIX)
         await client.send_message(message.channel, msg)
         return
 
@@ -70,6 +77,87 @@ async def do_react(message, argv):
     else:
         await client.send_message(message.channel, 'That reaction doesn\'t exist! :\'(')
         return
+
+
+# add another reaction image
+async def do_add_react(message, argv):
+    if len(argv) != 4:
+        msg = 'Error: needs 3 arguments. See `{}help`'.format(PREFIX)
+        await client.send_message(message.channel, msg)
+        return
+
+    # only accept reaction commands <= 16 chars
+    if len(argv[1]) > 16:
+        msg = 'Error: reaction command must be <= 16 characters'
+        await client.send_message(message.channel, msg)
+        return
+
+    # only accept alphanumeric+_ in reaction
+    if not re.match(r'^\w+$', argv[1]):
+        msg = 'Error: reaction command must only contain alphanumeric and \'_\' characters'
+        await client.send_message(message.channel, msg)
+        return
+
+    # check if reaction command already exists
+    try:
+        with open('replies.yaml', 'r') as f:
+            replies = yaml.load(f)
+    except:
+        print('Error opening replies file')
+        return
+    if argv[1].lower() in replies:
+        msg = 'Error: reaction command `{}` already exists'.format(argv[1])
+        await client.send_message(message.channel, msg)
+        return
+
+    # get image header
+    try:
+        d = urllib.request.urlopen(argv[3])
+    except:
+        msg = 'Error: could not open url `{}`'.format(argv[3])
+        await client.send_message(message.channel, msg)
+        return
+
+    # check file type
+    valid_types = ['image/gif', 'image/jpg', 'image/png', 'image/webm', 'video/webm']
+    if d.info()['Content-Type'] not in valid_types:
+        msg = 'Error: file must be one of: {},\nfile is type {}'.format(valid_types, d.info()['Content-Type'])
+        await client.send_message(message.channel, msg)
+        return
+
+    # check file size
+    size_lim_MB = 5
+    size_limit = size_lim_MB*1048576
+    if int(d.info()['Content-Length']) > size_limit:
+        msg = 'Error: file size must be < {} MB'.format(size_lim_MB)
+        msg += '\nfile is {} B'.format(d.info()['Content-Length'])
+        await client.send_message(message.channel, msg)
+
+    # extract extension and download file
+    f_ext = d.info()['Content-Type'].split('/')[1]
+    f_path = './reply_files/{}.{}'.format(argv[1].lower(), f_ext)
+    urllib.request.urlretrieve(argv[3], f_path)
+
+    # update replies.yaml
+    new_data = { argv[1]: { 'message': argv[2], 'file': f_path } }
+    try:
+        with open('replies.yaml', 'r') as f:
+            cur_yaml = yaml.load(f)
+            cur_yaml.update(new_data)
+    except:
+        print('Error opening replies file')
+        return
+    try:
+        with open('replies.yaml', 'w') as f:
+            yaml.safe_dump(cur_yaml, f, default_flow_style=False)
+    except:
+        print('Error saving replies file')
+        return
+
+    # success!
+    msg = 'Successfully added reaction `{}`'.format(argv[1])
+    await client.send_message(message.channel, msg)
+
 
 
 # list current reactions
@@ -109,6 +197,10 @@ def gen_help():
     msg = 'list of commands:\n'
     msg += '**Reply with a reaction**\n'
     msg += '`{}react reaction`\n'.format(PREFIX)
+    msg += 'Example: `{}react bang`\n'.format(PREFIX)
+    msg += '\n**Add a new reactions**\n'
+    msg += '`{}add reaction_command message_text link_to_file`\n'.format(PREFIX)
+    msg += 'Example: `{}add bang "Bang bang bang!" example.com/bang.gif`\n'.format(PREFIX)
     msg += '\n**List all reactions**\n'
     msg += '`{}list`\n'.format(PREFIX)
     return msg
