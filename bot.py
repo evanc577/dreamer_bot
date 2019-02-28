@@ -155,7 +155,7 @@ async def do_add_react(message, argv):
     await client.send_message(message.channel, msg)
 
 async def do_remove_react(message, argv):
-    if len(argv) != 3:
+    if len(argv) != 2:
         msg = 'Error: needs 1 arguments. See `{}help`'.format(PREFIX)
         await client.send_message(message.channel, msg)
         return
@@ -189,6 +189,10 @@ async def do_remove_react(message, argv):
     except:
         print('Error saving replies file')
         return
+
+    # success!
+    msg = 'Successfully removed reaction `{}`'.format(argv[1])
+    await client.send_message(message.channel, msg)
 
 
 # list current reactions
@@ -229,9 +233,12 @@ def gen_help():
     msg += '**Reply with a reaction**\n'
     msg += '`{}react reaction`\n'.format(PREFIX)
     msg += 'Example: `{}react bang`\n'.format(PREFIX)
-    msg += '\n**Add a new reactions**\n'
+    msg += '\n**Add a new reaction**\n'
     msg += '`{}add reaction_command message_text link_to_file`\n'.format(PREFIX)
     msg += 'Example: `{}add bang "Bang bang bang!" example.com/bang.gif`\n'.format(PREFIX)
+    msg += '\n**Delete a reaction**\n'
+    msg += '`{}delete reaction_command`\n'.format(PREFIX)
+    msg += 'Example: `{}delete bang`\n'.format(PREFIX)
     msg += '\n**List all reactions**\n'
     msg += '`{}list`\n'.format(PREFIX)
     return msg
