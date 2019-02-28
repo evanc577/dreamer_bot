@@ -43,6 +43,8 @@ async def run_command(message):
         await do_help(message, argv)
     elif command == 'a'or command == 'add':
         await do_add_react(message, argv)
+    elif command == 'd' or command == 'delete':
+        await do_remove_react(message, argv)
     else:
         await do_unknown(message, argv)
 
