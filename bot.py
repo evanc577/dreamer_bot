@@ -33,21 +33,15 @@ async def run_command(message):
         await client.send_message(message.channel, 'Error: could not parse input')
         return
 
-    if argv[0].lower() == 'r':
+
+    command = argv[0].lower()
+    if command == 'r' or command == 'react':
         await do_react(message, argv)
-    elif argv[0].lower() == 'react':
-        await do_react(message, argv)
-    elif argv[0].lower() == 'l':
+    elif command == 'l' or command == 'list':
         await do_list(message, argv)
-    elif argv[0].lower() == 'list':
-        await do_list(message, argv)
-    elif argv[0].lower() == 'h':
+    elif command == 'h' or command == 'help':
         await do_help(message, argv)
-    elif argv[0].lower() == 'help':
-        await do_help(message, argv)
-    elif argv[0].lower() == 'a':
-        await do_add_react(message, argv)
-    elif argv[0].lower() == 'add':
+    elif command == 'a'or command == 'add':
         await do_add_react(message, argv)
     else:
         await do_unknown(message, argv)
@@ -119,7 +113,7 @@ async def do_add_react(message, argv):
         return
 
     # check file type
-    valid_types = ['image/gif', 'image/jpg', 'image/png', 'image/webm', 'video/webm']
+    valid_types = ['image/gif', 'image/jpg', 'image/png', 'image/webm', 'video/webm', 'video/mp4']
     if d.info()['Content-Type'] not in valid_types:
         msg = 'Error: file must be one of: {},\nfile is type {}'.format(valid_types, d.info()['Content-Type'])
         await client.send_message(message.channel, msg)
