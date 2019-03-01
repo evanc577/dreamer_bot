@@ -28,9 +28,6 @@ PREFIX = '!'
 
 # run bot command
 async def run_command(message):
-    if message.author == client.user:
-        return
-
     # process arguments
     try:
         argv = shlex.split(message.content[1:])
@@ -101,5 +98,6 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    await client.change_presence(game=discord.Game(name='{}help'.format(PREFIX)))
 
 client.run(TOKEN)
