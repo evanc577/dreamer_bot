@@ -92,7 +92,8 @@ async def do_add_react(client, message, argv):
     urllib.request.urlretrieve(argv[3], f_path)
 
     # update replies.yaml
-    new_data = { argv[1].lower(): { 'message': argv[2], 'file': f_path } }
+    uid = message.author.id
+    new_data = { argv[1].lower(): { 'message': argv[2], 'file': f_path, 'uid': uid } }
     try:
         with open('replies.yaml', 'r') as f:
             cur_yaml = yaml.load(f)
@@ -117,17 +118,29 @@ async def do_remove_react(client, message, argv):
         await client.send_message(message.channel, msg)
         return
 
-    # check if reaction command already exists
     try:
         with open('replies.yaml', 'r') as f:
             replies = yaml.load(f)
     except:
         print('Error opening replies file')
         return
+
+    # check if reaction command exists
     if argv[1].lower() not in replies:
         msg = 'Error: reaction command `{}` does not exist'.format(argv[1])
         await client.send_message(message.channel, msg)
         return
+
+    # check if uid matches
+    if 'uid' in replies[argv[1]]:
+        if message.author.id != replies[argv[1]]['uid']:
+            msg = 'Error: you don\'t own that reaction'
+            await client.send_message(message.channel, msg)
+            return
+    else:
+        msg = 'Warning: deleting public reaction'
+        await client.send_message(message.channel, msg)
+
 
     #load file and remove react from it, then resave it
     try:

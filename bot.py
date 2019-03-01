@@ -28,6 +28,9 @@ PREFIX = '!'
 
 # run bot command
 async def run_command(message):
+    if message.author == client.user:
+        return
+
     # process arguments
     try:
         argv = shlex.split(message.content[1:])
