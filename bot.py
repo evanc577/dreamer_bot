@@ -115,7 +115,7 @@ async def do_add_react(message, argv):
         return
 
     # check file type
-    valid_types = ['image/gif', 'image/jpg', 'image/png', 'image/webm', 'video/webm', 'video/mp4']
+    valid_types = ['image/gif', 'image/jpg', 'image/jpeg', 'image/png', 'image/webm', 'video/webm', 'video/mp4']
     if d.info()['Content-Type'] not in valid_types:
         msg = 'Error: file must be one of: {},\nfile is type {}'.format(valid_types, d.info()['Content-Type'])
         await client.send_message(message.channel, msg)

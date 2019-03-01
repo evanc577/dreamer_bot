@@ -7,7 +7,7 @@ Discord bot
 - pyyaml
 
 ## Usage
-Create files called `auth.yaml` and `replies.yaml`
+Create files called `auth.yaml` and `replies.yaml`.
 Create a directory `reply_files/`
 
 ### auth.yaml
