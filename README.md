@@ -5,6 +5,7 @@ Discord bot
 - python3.6
 - discord.py
 - pyyaml
+- systemd
 
 ## Usage
 Create files called `auth.yaml` and `replies.yaml`.
